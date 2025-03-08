@@ -1,0 +1,36 @@
+{ 
+    [0]=> array(1468) { 
+        [0]=> array(8) { 
+            ["fechacreado"]=> string(28) "06-MAR-25 04.04.53.000000 PM" 
+            ["titulo"]=> string(34) "CONSECUTIVO PROMOCIONAL MARZO 2025" 
+            ["estatus"]=> string(5) "Leido" 
+            ["fechaleido"]=> string(28) "06-MAR-25 04.50.46.000000 PM" 
+            ["sucursalregion"]=> string(7) "Noreste" 
+            ["responsableregion"]=> string(7) "Noreste" 
+            ["responsablecargo"]=> string(11) "Gerente ATC" 
+            ["responsablenombre"]=> string(27) "Emilio Ricardo Blanco Ponce" 
+        } 
+        [1]=> array(8) { 
+            ["fechacreado"]=> string(28) "06-MAR-25 04.04.53.000000 PM" 
+            ["titulo"]=> string(34) "CONSECUTIVO PROMOCIONAL MARZO 2025" 
+            ["estatus"]=> string(5) "Leido" 
+            ["fechaleido"]=> string(28) "06-MAR-25 07.21.15.000000 PM" 
+            ["sucursalregion"]=> string(13) "Metropolitana" 
+            ["responsableregion"]=> string(13) "Metropolitana" 
+            ["responsablecargo"]=> string(11) "Gerente ATC" 
+            ["responsablenombre"]=> string(30) "Juan Carlos Cisneros Dominguez" 
+        }
+    }
+    [1]=> array(1468) {  
+        [0]=> array(8) { 
+            ["fechacreado"]=> string(28) "06-MAR-25 04.03.31.000000 PM" 
+            ["titulo"]=> string(33) "IZZITV+ CON VIX PREMIUM SIN COSTO" 
+            ["estatus"]=> string(5) "Leido" 
+            ["fechaleido"]=> string(28) "06-MAR-25 05.05.56.000000 PM" 
+            ["sucursalregion"]=> string(13) "Metropolitana" 
+            ["responsableregion"]=> string(13) "Metropolitana" 
+            ["responsablecargo"]=> string(11) "Gerente ATC" 
+            ["responsablenombre"]=> string(20) "Miriam Aguilar Serna" 
+        } 
+    }
+}
