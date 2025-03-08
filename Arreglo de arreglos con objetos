@@ -34,3 +34,49 @@
         } 
     }
 }
+
+######################################################################################################
+
+<?php
+// Definimos las regiones con contador inicial en 0
+$regiones = ['Metropolitana' => 0, 'Noreste' => 0, 'Occidente' => 0, 'Pacifico' => 0, 'Sureste' => 0];
+
+$regionesLeidos = $regionesPendientes = $regiones;
+
+// Recorrer el arreglo de arreglos
+foreach ($datos as $subArray) { // Primer nivel
+    foreach ($subArray as $elemento) { // Segundo nivel
+        $region = $elemento['responsableregion'];
+
+        if (isset($regiones[$region])) {
+            if ($elemento['estatus'] === 'Leido') {
+                $regionesLeidos[$region]++;
+            } elseif ($elemento['estatus'] === 'Pendiente') {
+                $regionesPendientes[$region]++;
+            }
+        }
+    }
+}
+
+// Generar el resultado estructurado
+$dataRegiones = [];
+
+foreach ($regiones as $region => $valor) {
+    $total = $regionesLeidos[$region] + $regionesPendientes[$region];
+    $porcentaje = $total > 0 ? round(($regionesLeidos[$region] / $total) * 100) : 0;
+
+    $dataRegiones[] = [
+        'region' => $region,
+        'leidos' => $regionesLeidos[$region],
+        'pendientes' => $regionesPendientes[$region],
+        'total' => $total,
+        'porcentaje' => $porcentaje
+    ];
+}
+
+// Mostrar los resultados
+echo "<pre>";
+print_r($dataRegiones);
+echo "</pre>";
+?>
+
