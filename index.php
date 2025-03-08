@@ -46,3 +46,8 @@ Es un arreglo de objetos con la siguiente estructura:
 
     var_dump($dataRegiones);
     print_r($dataRegiones);
+
+Regiones Leidos:
+Array ( [Metropolitana] => 0 [Noreste] => 0 [Occidente] => 0 [Pacifico] => 0 [Sureste] => 0 ) 
+Regiones Pendientes:
+Array ( [Metropolitana] => 0 [Noreste] => 0 [Occidente] => 0 [Pacifico] => 0 [Sureste] => 0 )
