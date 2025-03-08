@@ -1,0 +1,115 @@
+ # Datos para Gerentes ATC
+    $dataGerentes = [];
+    $dataGerentesPorSucursal = [];
+
+    // Se recorre el arreglo para obtener los datos de los gerentes
+    foreach ($data as $gerente) {
+        $nombreGerente = $gerente['responsablenombre'];
+        $sucursal = $gerente['sucursal'];
+    
+        // Inicializamos los contadores por gerente
+        if ( !isset($dataGerentes[$nombreGerente])) {
+            $dataGerentes[$nombreGerente] = [
+                'gerente' => $nombreGerente,
+                'leidos' => 0,
+                'pendientes' => 0,
+                'total' => 0,
+                'porcentaje' => 0,
+                'antes' => 0,
+                'despues' => 0,
+                'porcentajeAntes' => 0,
+                'porcentajeDespues' => 0,
+            ];
+        }
+
+        // Inicializamos los contadores por gerente y sucursal
+        if(!isset($dataGerentesPorSucursal[$nombreGerente][$sucursal])){
+            $dataGerentesPorSucursal[$nombreGerente][$sucursal] = [
+                'gerente' => $nombreGerente,
+                'sucursal' => $sucursal,
+                'leidos' => 0,
+                'pendientes' => 0,
+                'total' => 0,
+                'porcentaje' => 0,
+                'antes' => 0,
+                'despues' => 0,
+                'porcentajeAntes' => 0,
+                'porcentajeDespues' => 0,
+            ];
+        }
+    
+        // Contar leídos y pendientes (general y por sucursal)
+        if ($gerente['estatus'] === 'Leido') {
+            $dataGerentes[$nombreGerente]['leidos']++;
+            $dataGerentesPorSucursal[$nombreGerente][$sucursal]['leidos']++;
+        } elseif ($gerente['estatus'] === 'Pendiente') {
+            $dataGerentes[$nombreGerente]['pendientes']++;
+            $dataGerentesPorSucursal[$nombreGerente][$sucursal]['pendientes']++;
+        }
+    
+        // Calcular los días entre fechacreado y fechaleido
+        $fechaCreado = DateTime::createFromFormat('d-M-y h.i.s.u A', $gerente['fechacreado']);
+        $fechaLeido = DateTime::createFromFormat('d-M-y h.i.s.u A', $gerente['fechaleido']);
+    
+        if ($fechaCreado && $fechaLeido) {
+            $diferenciaDias = $fechaCreado->diff($fechaLeido)->days;
+    
+            if ($diferenciaDias <= 3) {
+                $dataGerentes[$nombreGerente]['antes']++;
+                $dataGerentesPorSucursal[$nombreGerente][$sucursal]['antes']++;
+            } else {
+                $dataGerentes[$nombreGerente]['despues']++;
+                $dataGerentesPorSucursal[$nombreGerente][$sucursal]['despues']++;
+            }
+        }
+    }
+ 
+    // Calcular los totales y porcentajes
+    foreach ($dataGerentes as &$gerenteData) {
+        $gerenteData['total'] = $gerenteData['leidos'] + $gerenteData['pendientes'];
+    
+        // Evitar divisiones por cero
+        if ($gerenteData['total'] > 0) {
+            $gerenteData['porcentaje'] = round(($gerenteData['leidos'] / $gerenteData['total']) * 100);
+        }
+    
+        if ($gerenteData['leidos'] > 0) {
+            $gerenteData['porcentajeAntes'] = round(($gerenteData['antes'] / $gerenteData['leidos']) * 100);
+            $gerenteData['porcentajeDespues'] = round(($gerenteData['despues'] / $gerenteData['leidos']) * 100);
+        }
+    }
+
+    // Calcular totales y porcentajes por sucursal 
+    foreach($dataGerentesPorSucursal as $nombreGerente => &$sucursales){
+        foreach($sucursales as &$sucursalData){
+            $sucursalData['total'] = $sucursalData['leidos'] + $sucursalData['pendientes'];
+
+            if($sucursalData['total'] > 0){
+                $sucursalData['porcentaje'] = round(($sucursalData['leidos'] / $sucursalData['total']) * 100);
+            }
+
+            if($sucursalData['leidos'] > 0){
+                $sucursalData['porcentajeAntes'] = round(($sucursalData['antes'] / $sucursalData['leidos']) * 100);
+                $sucursalData['porcentajeDespues'] = round(($sucursalData['despues'] / $sucursalData['leidos']) * 100);
+            }
+        }
+    }
+ 
+    // Convertimos la estructura en un array indexado para mantener la salida esperada
+    $dataGerentes = array_values($dataGerentes);
+
+    foreach($dataGerentesPorSucursal as $nombreGerente => $sucursales) {
+        $dataGerentesPorSucursal[$nombreGerente] = array_values($sucursales);
+    }
+
+    // Ordena alfabéticamente por el nombre del gerente
+    usort($dataGerentes, function ($a, $b) {
+        return strcmp($a['gerente'], $b['gerente']);
+    });
+
+    // Ordena las sucursales dentro de cada gerente 
+    foreach($dataGerentesPorSucursal as &$sucursales){
+        usort($sucursales, function($a, $b){
+            return strcmp($a['sucursal'], $b['sucursal']);
+        });
+    }
