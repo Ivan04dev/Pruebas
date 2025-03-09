@@ -499,8 +499,10 @@
         return $exito;
     }
 
-    # Recorre cada id del arreglo
+    $tablasRegiones = "";
+    $tablasGerentes = "";
 
+    # Recorre cada id del arreglo
     for($i = 0; $i < $cantidadLecturas; $i++){
         $idLectura = $resultadoLecturas[$i]['idLectura'];
         # Arreglo actual
