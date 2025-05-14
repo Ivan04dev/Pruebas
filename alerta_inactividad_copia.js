@@ -1,6 +1,6 @@
 console.log('Desde alerta_inactividad_copia.js');
 let tiempoInactividad;
-const tiempoMaxInactividad = 20 * 60 * 1000; // 25 Minutos
+const tiempoMaxInactividad = 20 * 60 * 1000; // 20 Minutos
 let alertaMostrada = false;
 let interval;
 
