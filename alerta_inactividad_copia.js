@@ -53,23 +53,6 @@ function mostrarAlerta() {
     if (alertaMostrada) return;
     alertaMostrada = true;
 
-    /*
-    fetch('_renovar_sesion_copia.php')
-        .then(response => response.text())
-        .then(data => {
-            if(data.trim() !== 'OK'){
-                window.location.href = 'index.php';
-                return;
-            }
-
-            lanzarSweetAlerta();
-        })
-        .catch(e => {
-            console.error('Error renovando sesión: ', e);
-            window.location.href = 'index.php';
-    });
-    */
-
     lanzarSweetAlerta();
 }
 
@@ -151,7 +134,11 @@ function lanzarSweetAlerta(){
                     console.log('Respuesta renovación sesión: ', data);
                     if (data.trim() === 'OK') {
                         // Reinicia el temporizador después de renovar sesión 
-                        reiniciarTemporizador();
+                        // reiniciarTemporizador();
+
+                        // Sólo si el servidor acepta la renovación
+                        alertaMostrada = false;
+                        tiempoespera = 300;
 
                         Swal.fire({
                             title: 'Sesión renovada',
@@ -160,12 +147,13 @@ function lanzarSweetAlerta(){
                             confirmButtonText: 'Aceptar',
                             customClass: { confirmButton: 'btn-confirm' },
                             buttonsStyling: false
-                        });
-
-                        // Reinicia el temporizador 
-                        // reiniciarTemporizador();
+                        }).then(() => {
+                            // Reinicia el temporizador 
+                            reiniciarTemporizador();
+                        })
                         
                     } else {
+                        // Se muestra sólo si no fue posible renovar la sesión 
                         Swal.fire('Sesión no activa', 'Debes iniciar sesión nuevamente', 'error')
                             .then(() => window.location.href = 'index.php');
                     }
@@ -179,9 +167,12 @@ function lanzarSweetAlerta(){
 
 function reiniciarTemporizador() {
     if(alertaMostrada){
-        clearInterval(interval);
-        Swal.close();
+        // clearInterval(interval);
+        // Swal.close();
+        console.log('Alerta mostrada: no se reinicia temporizador');
+        return;
     }
+
     clearTimeout(tiempoInactividad);
     alertaMostrada = false;
     tiempoespera = 300;
