@@ -1,3 +1,4 @@
+Respuesta renovar sesión: {status: 'NO_SESSION'}
 <?php
 session_start();
 header('Content-Type: application/json');
