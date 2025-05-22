@@ -7,6 +7,8 @@ let interval;
 let tiempoespera = 300; // 5 minutos (en segundos)
 // let tiempoespera = 180; // 5 minutos (en segundos)
 let timeoutAlerta;
+
+let contadorRenovaciones = 0;
  
 function notificarSesionPorExpirar() {
     if (Notification.permission === 'granted') {
@@ -22,10 +24,12 @@ function notificarSesionPorExpirar() {
         };
     }
  
+    /*
     timeoutAlerta = setTimeout(() => {
         console.log('Mostrando alerta tras 10 segundos de notificación.');
         mostrarAlerta();
     }, 10 * 1000);
+    */
 }
  
 function formatearTiempo(segundos) {
@@ -161,8 +165,7 @@ async function renovarSesion() {
     try {
         const response = await fetch('_renovar_sesion_copia.php', {
             method: 'GET',
-            // credentials: 'same-origin'
-            credentials: 'include'
+            credentials: 'same-origin'
         });
         const data = await response.json();
  
@@ -305,21 +308,98 @@ function iniciarContadorSesion() {
  
 document.addEventListener('DOMContentLoaded', iniciarContadorSesion);
 
-// Renovación silenciosa
-setInterval(() => {
-    fetch('_renovar_sesion_copia.php', {
-        method: 'GET',
-        credentials: 'include',
+// Renueva la sesión manualmente
+document.addEventListener('DOMContentLoaded', () => {
+    // Botón Guardar del formulario 
+    const form = document.querySelector('#form_registro_actividad_cdm');
+    if(form) return;
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+
+        fetch('_renovar_sesion_copia.php', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'OK'){
+                console.log(`Se actualiza la sesión desde el botón guardar del formulario, nueva sesión: ${data.nuevo_ultimo_acceso}`);
+                guardarFormulario(form);
+            } else {
+                Swal.fire('Sesión no activa', 'Debes iniciar sesión nuevamente','error')
+                    .then(() => window.location.href = 'index.php');
+            }
+        })
+        .catch(error => {
+            console.error('Error al renovar sesión: ', error);
+            Swal.fire('Error', 'No se puede renovar la sesión. Intente nuevamente.', 'error');
+        });
     })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === 'OK'){
-            console.log(`[Renovación Silenciosa] Sesión renovada a las ${data.nuevo_ultimo_acceso}`);
-        } else {
-            console.warn('[Renovación Silenciosa] No hay sesión activa.')
-        }
-    })
-    .catch(err => {
-        console.error('[Renovación silenciosa] Error al renovar sesión: ', err);
-    });
-}, 5 * 60 * 1000);
+
+    const contenedorBoton = document.querySelector('#contenedor-renovar-sesion');
+    const botonRenovar = document.querySelector('#btn_renovar_sesion');
+    const mensaje = document.querySelector('#mensaje_renovacion');
+
+    // Muestra el botón cada 5 minutos 
+    setInterval(() => {
+        notificarSesionPorExpirar();
+        contenedorBoton.classList.remove('d-none');
+    }, 10 * 60 * 1000);
+
+        botonRenovar.addEventListener('click', async () => {
+            botonRenovar.disabled = true;
+            botonRenovar.textContent = 'Renovando...';
+
+            try {
+                const response = await fetch('_renovar_sesion_copia.php', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if(data.status === 'OK'){
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sesión Renovada',
+                        html: `<p>Último acceso actualizado a <br><strong>${data.nuevo_ultimo_acceso}</strong></p>`,
+                        confirmButtonText: 'Aceptar'
+                    })
+
+                    console.log('Sesión renovada manualmente');
+                    reiniciarTemporizador();
+
+                    contenedorBoton.classList.add('d-none');
+
+                    const access_text = document.querySelector('#last_access');
+
+                    if(access_text){
+                        access_text.innerText = data.nuevo_ultimo_acceso;
+                    }
+
+                    contadorRenovaciones++;
+                    console.log(`Veces que se ha renoado la sesión: ${contadorRenovaciones}`);
+
+                    // Mensaje temporal 
+                    mensaje.classList.remove('d-none');
+                    mensaje.classList.add('d-inline');
+
+                    setTimeout(() => {
+                        mensaje.classList.remove('d-inline');
+                        mensaje.classList.add('d-none');
+                    }, 5000);
+                } else {
+                    Swal.fire('Sesion no activa', 'Debes iniciar sesión nuevamente', 'error')
+                        .then(() => window.location.href = 'index.php');
+                }
+            }catch(error){
+                console.error('Error al renovar sesión manual: ', error);
+                Swal.fire('Error', 'No se pudo renovar la sesión. Intenta nuevamente', 'error')
+            }finally{
+                botonRenovar.disabled = false;
+                botonRenovar.textContent = 'Renovar sesión';
+            }
+        });
+});
+
