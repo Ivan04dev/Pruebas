@@ -66,47 +66,38 @@ $(document).ready(function(){
 
 Gráficas
 
-function graficarResumenGerentes(datos) {
-  const titulos = [...new Set(datos.map(d => d.TITULO))];
+function graficarComunicados(datos) {
+  const titulos = datos.map(d => d.TITULO);
+  const leidos = datos.map(d => parseInt(d.TOTALLEIDOS) || 0);
+  const pendientes = datos.map(d => parseInt(d.TOTALPENDIENTES) || 0);
 
-  const gerentes = {};
-  datos.forEach(d => {
-    const gerente = d.RESPONSABLE;
-    const titulo = d.TITULO;
-    const index = titulos.indexOf(titulo);
-
-    if (!gerentes[gerente]) {
-      gerentes[gerente] = Array(titulos.length).fill(0);
-    }
-
-    gerentes[gerente][index] = parseInt(d.TOTAL_LEIDOS) || 0;
-  });
-
-  const series = Object.entries(gerentes).map(([gerente, valores]) => ({
-    name: gerente,
-    data: valores
-  }));
-
-  Highcharts.chart('graficaResumenGerentes', {
+  Highcharts.chart('graficaComunicados', {
     chart: { type: 'column' },
-    title: { text: 'Lectura por Gerente y Comunicado' },
+    title: { text: 'Lectura de Comunicados' },
     xAxis: {
       categories: titulos,
-      title: { text: 'Comunicado' },
+      title: { text: 'Título del Comunicado' },
       labels: { rotation: -45 }
     },
     yAxis: {
       min: 0,
-      title: { text: 'Total Leídos' }
+      title: { text: 'Cantidad' }
     },
     tooltip: { shared: true },
     plotOptions: {
-      column: { dataLabels: { enabled: true } }
+      column: {
+        stacking: 'normal',
+        dataLabels: { enabled: true }
+      }
     },
-    series,
+    series: [
+      { name: 'Leídos', data: leidos, color: '#28A745' },
+      { name: 'Pendientes', data: pendientes, color: '#DC3545' }
+    ],
     credits: { enabled: false }
   });
 }
+
 
 
 function graficarResumenGerentes(datos) {
