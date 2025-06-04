@@ -61,3 +61,93 @@ $(document).ready(function(){
   });
   
 })
+
+#########################################################################################################
+
+Gráficas
+
+function graficarResumenGerentes(datos) {
+  const titulos = [...new Set(datos.map(d => d.TITULO))];
+
+  const gerentes = {};
+  datos.forEach(d => {
+    const gerente = d.RESPONSABLE;
+    const titulo = d.TITULO;
+    const index = titulos.indexOf(titulo);
+
+    if (!gerentes[gerente]) {
+      gerentes[gerente] = Array(titulos.length).fill(0);
+    }
+
+    gerentes[gerente][index] = parseInt(d.TOTAL_LEIDOS) || 0;
+  });
+
+  const series = Object.entries(gerentes).map(([gerente, valores]) => ({
+    name: gerente,
+    data: valores
+  }));
+
+  Highcharts.chart('graficaResumenGerentes', {
+    chart: { type: 'column' },
+    title: { text: 'Lectura por Gerente y Comunicado' },
+    xAxis: {
+      categories: titulos,
+      title: { text: 'Comunicado' },
+      labels: { rotation: -45 }
+    },
+    yAxis: {
+      min: 0,
+      title: { text: 'Total Leídos' }
+    },
+    tooltip: { shared: true },
+    plotOptions: {
+      column: { dataLabels: { enabled: true } }
+    },
+    series,
+    credits: { enabled: false }
+  });
+}
+
+
+function graficarResumenGerentes(datos) {
+  const titulos = [...new Set(datos.map(d => d.TITULO))];
+
+  const gerentes = {};
+  datos.forEach(d => {
+    const gerente = d.RESPONSABLE;
+    const titulo = d.TITULO;
+    const index = titulos.indexOf(titulo);
+
+    if (!gerentes[gerente]) {
+      gerentes[gerente] = Array(titulos.length).fill(0);
+    }
+
+    gerentes[gerente][index] = parseInt(d.TOTAL_LEIDOS) || 0;
+  });
+
+  const series = Object.entries(gerentes).map(([gerente, valores]) => ({
+    name: gerente,
+    data: valores
+  }));
+
+  Highcharts.chart('graficaResumenGerentes', {
+    chart: { type: 'column' },
+    title: { text: 'Lectura por Gerente y Comunicado' },
+    xAxis: {
+      categories: titulos,
+      title: { text: 'Comunicado' },
+      labels: { rotation: -45 }
+    },
+    yAxis: {
+      min: 0,
+      title: { text: 'Total Leídos' }
+    },
+    tooltip: { shared: true },
+    plotOptions: {
+      column: { dataLabels: { enabled: true } }
+    },
+    series,
+    credits: { enabled: false }
+  });
+}
+
