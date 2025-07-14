@@ -1,0 +1,220 @@
+function mostrarVideo(video, reanudarEn = 0) {
+    let tiempoInicio = null;
+    videosContainer.innerHTML = '';
+
+    const barraProgreso = document.createElement('div');
+    barraProgreso.className = 'barra-progreso';
+
+    const progresoInterno = document.createElement('div');
+    barraProgreso.className = 'barra-progeso-interno';
+    barraProgreso.appendChild(progresoInterno);
+
+    const { titulo, subtitulo, archivo, duracion } = video;
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'video-meta';
+    infoDiv.innerHTML = `
+            <h4 class="mb-1">${titulo}</h4>
+            <p class="mb-1">${subtitulo}</p>
+            <span class="badge bg-primary">Duración: ${duracion}</span>
+    `;
+
+    const videoEl = document.createElement('video');
+    videoEl.src = archivo;
+    videoEl.controls = true;
+    videoEl.preload = "auto";
+    videoEl.id = "videoActual";
+    videoEl.controlsList = "nodownload";
+
+    videoEl.addEventListener('play', () => {
+        if (!tiempoInicio) {
+            tiempoInicio = Date.now();
+        }
+    });
+
+    videoEl.addEventListener('ended', () => {
+        const tiempoFinal = Date.now();
+        const tiempoTranscurrido = Math.round((tiempoFinal - tiempoInicio) / 1000);
+
+        videosReproducidos[titulo] = (videosReproducidos[titulo] || 0) + 1;
+        localStorage.setItem("videos_reproducidos", JSON.stringify(videosReproducidos));
+
+        const tiemposVisualizados = JSON.parse(localStorage.getItem("tiempos_visualizados") || "{}");
+        tiemposVisualizados[titulo] = (tiemposVisualizados[titulo] || 0) + tiempoTranscurrido;
+        localStorage.setItem("tiempos_visualizados", JSON.stringify(tiemposVisualizados));
+
+        Swal.fire({
+            icon: 'success',
+            title: '¡Video finalizado!',
+            html: `Has terminado de ver: <strong>${titulo}</strong><br>Tiempo visualizado: <strong>${tiempoTranscurrido} segundos</strong>`
+        }).then(() => {
+            if (!videosVistos.includes(titulo)) {
+                videosVistos.push(titulo);
+                localStorage.setItem("videos_vistos", JSON.stringify(videosVistos));
+            }
+
+            const tarjetaOriginal = document.querySelector(`#contenedor-videos [data-titulo="${titulo}"]`);
+            if (tarjetaOriginal) {
+                const columna = tarjetaOriginal.closest('.col-md-4');
+                const fila = columna?.parentElement;
+                if (columna) columna.remove();
+                if (fila && fila.children.length === 0) fila.remove();
+            }
+
+            const col = document.createElement('div');
+            col.className = 'col-12';
+
+            const card = document.createElement('div');
+            card.className = 'card card-clickable h-100';
+            // card.style.cursor = 'pointer';
+            card.setAttribute('data-titulo', titulo);
+
+            const miniatura = document.createElement('video');
+            miniatura.src = video.archivo;
+            miniatura.muted = true;
+            miniatura.playsInline = true;
+            miniatura.currentTime = 1;
+            miniatura.className = 'video-miniatura';
+
+            const body = document.createElement('div');
+            body.className = 'card-body p-2';
+            body.innerHTML = `
+                    <h6 class="card-title mb-1">${video.titulo}</h6>
+                    <p class="card-text small text-muted mb-0">${video.subtitulo}</p>
+                    <p class="card-text small text-muted mb-0">Veces visto: ${videosReproducidos[titulo]}</p>
+            `;
+
+            card.appendChild(miniatura);
+            card.appendChild(body);
+            col.appendChild(card);
+
+            card.addEventListener('click', () => {
+                document.querySelector('#contenedor-videos').classList.add('d-none');
+                mostrarVideo(video);
+            });
+
+            listaVistos.prepend(col);
+            contenedorVistos.classList.remove('d-none');
+
+            videosContainer.innerHTML = '';
+
+            const quedanVideos = document.querySelectorAll('#contenedor-videos .col-md-4').length;
+            if (quedanVideos === 0) {
+                contenedorGrid.innerHTML = `
+                        <div class="alert alert-info text-center" role="alert">
+                            <h5 class="mb-2">¡Has visto todos los vídeos!</h5>
+                            <p class="mb-0">No quedan más vídeos pendientes</p>
+                        </div>
+                    `;
+            } else {
+                contenedorGrid.classList.remove('d-none');
+            }
+        });
+
+        console.log(titulo);
+        console.log(typeof(titulo));
+        console.log(tiempoEnMin);
+        console.log(typeof(tiempoEnMin));
+        console.log(usuario);
+        console.log(typeof(usuario));
+
+        // calificarVideo(titulo, tiempoEnMin, usuario);
+
+        const btnExportar = document.querySelector('#btnExportar');
+
+        if (Object.keys(videosReproducidos).length === 0) {
+            btnExportar.classList.add('d-none');
+        }
+
+        // Botón exportar a Excel
+        btnExportar.addEventListener('click', async () => {
+            console.log('Desde btnExportar');
+            const tiemposVisualizados = JSON.parse(localStorage.getItem("tiempos_visualizados") || "{}");
+
+            const worbook = new ExcelJS.Workbook();
+            const worksheet = worbook.addWorksheet('Reporte');
+
+            worksheet.mergeCells('A2:B2');
+            const titulo = worksheet.getCell('A2');
+            titulo.value = 'Reporte vídeos de capacitación';
+            titulo.font = { size: 16, bold: true, color: { argb: 'FF00B050' } };
+            titulo.alignment = { horizontal: 'center', vertical: 'middle' };
+            worksheet.getRow(2).height = 30;
+
+            worksheet.getRow(5).values = ['Titulo', 'Veces visto', 'Tiempo visualizado (min)'];
+            worksheet.columns = [
+                { key: 'titulo', width: 40 },
+                { key: 'veces', width: 15 },
+                { key: 'tiempo', width: 15 },
+            ];
+
+            // Cabecera
+            worksheet.getRow(5).font = { bold: true };
+            worksheet.getRow(5).alignment = { horizontal: 'center' };
+            worksheet.getRow(5).eachCell(cell => {
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFEFEFEF' }
+                };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+
+            let filaActual = 6;
+            for (const [titulo, veces] of Object.entries(videosReproducidos)) {
+                const tiempoEnMin = Math.round((tiemposVisualizados[titulo] || 0) / 60);
+
+                worksheet.getCell(`A${filaActual}`).value = titulo;
+                worksheet.getCell(`B${filaActual}`).value = veces;
+                worksheet.getCell(`C${filaActual}`).value = tiempoEnMin;
+
+                ['A', 'B', 'C'].forEach(col => {
+                    const cell = worksheet.getCell(`${col}${filaActual}`);
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+
+                filaActual++;
+            }
+
+            // Descarga
+            const buffer = await worbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.href = url;
+            link.download = "Reporte_visualizaciones.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        })
+    });
+
+    videoEl.addEventListener('timeupdate', () => {
+        const porcentaje = (videoEl.currentTime / videoEl.duration) * 100;
+        progresoInterno.style.width = `${porcentaje}%`;
+
+        const progreso = {
+            titulo,
+            tiempo: videoEl.currentTime
+        };
+
+        localStorage.setItem("ultimo_progreso", JSON.stringify(progreso));
+    });
+
+    videosContainer.appendChild(videoEl);
+    videosContainer.appendChild(barraProgreso);
+    videosContainer.appendChild(infoDiv);
+}
