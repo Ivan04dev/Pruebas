@@ -1,0 +1,81 @@
+<!-- Botón en el sidenav -->
+<li class="nav-item">
+  <button class="btn btn-primary w-100" id="btnAbrirModal">
+    <i class="bi bi-plus-circle"></i> Agregar vídeo
+  </button>
+</li>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modalNuevoVideo" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar nuevo vídeo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formNuevoVideo">
+          <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <input type="text" class="form-control" id="titulo" required>
+          </div>
+          <div class="mb-3">
+            <label for="subtitulo" class="form-label">Subtítulo</label>
+            <input type="text" class="form-control" id="subtitulo" required>
+          </div>
+          <div class="mb-3">
+            <label for="archivo" class="form-label">URL del vídeo</label>
+            <input type="text" class="form-control" id="archivo" required>
+          </div>
+          <div class="mb-3">
+            <label for="duracion" class="form-label">Duración (en minutos)</label>
+            <input type="number" class="form-control" id="duracion" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="formNuevoVideo" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+#################################################################################################
+
+document.getElementById('btnAbrirModal').addEventListener('click', () => {
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevoVideo'));
+  modal.show();
+});
+
+
+document.getElementById('formNuevoVideo').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const datos = {
+    titulo: document.getElementById('titulo').value,
+    subtitulo: document.getElementById('subtitulo').value,
+    archivo: document.getElementById('archivo').value,
+    duracion: parseFloat(document.getElementById('duracion').value)
+  };
+
+  try {
+    const response = await fetch('insertar_video.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+
+    const result = await response.json();
+    if (result.status === 'ok') {
+      Swal.fire('Éxito', 'Vídeo guardado correctamente', 'success');
+      document.getElementById('formNuevoVideo').reset();
+      bootstrap.Modal.getInstance(document.getElementById('modalNuevoVideo')).hide();
+    } else {
+      throw new Error(result.error || 'Error al guardar');
+    }
+  } catch (err) {
+    Swal.fire('Error', err.message, 'error');
+  }
+});
