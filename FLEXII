@@ -1,0 +1,24 @@
+/**
+admin_stock_copia_.js:5 
+Uncaught TypeError: selectTipo.addEventListener is not a function
+    at HTMLDocument.<anonymous> (admin_stock_copia_.js:5:14)
+(anonymous)	@	admin_stock_copia_.js:5
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  let selectTipo = document.querySelector('#tipo').value;
+  console.log(selectTipo);
+
+  selectTipo.addEventListener('change', () => {
+    if(selectTipo.value === 'division'){
+      document.querySelector('#division').classList.remove('d-none');
+    } else if(selectTipo.value === 'ciudad'){
+      document.querySelector('#ciudad').classList.remove('d-none');
+      document.querySelector('#btnExportarDivision').classList.add('d-none');
+    } else if(selectTipo.value === 'sucursal'){
+      document.querySelector('#ciudad').classList.remove('d-none');
+      document.querySelector('#btnExportarDivision').classList.add('d-none');
+      document.querySelector('#btnExportarCiudad').classList.add('d-none');
+    }
+  })
+});
